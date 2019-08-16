@@ -2,12 +2,12 @@
 source("code/helper-functions.R")
 
 # load all data and model outputs
-stan_plot <- readRDS("outputs/stan_predictions.rds")
-ctree_plot <- readRDS("outputs/ctree_predictions.rds")
-sp_data <- readRDS("data/full-data-set.rds")
-mod_stan <- readRDS("outputs/mod_stan.rds")
-pd_regress <- readRDS("outputs/pd_regress.rds")
-pd_class <- readRDS("outputs/pd_class.rds")
+stan_plot <- readRDS("outputs/stan_predictions_r1.rds")
+ctree_plot <- readRDS("outputs/ctree_predictions_r1.rds")
+sp_data <- readRDS("data/full-data-set_r1.rds")
+mod_stan <- readRDS("outputs/mod_stan_r1.rds")
+pd_regress <- readRDS("outputs/pd_regress_r1.rds")
+pd_class <- readRDS("outputs/pd_class_r1.rds")
 
 # plot Fig. 1: residuals from fitted models
 pdf(file = "outputs/figs/Fig1.pdf")
@@ -33,7 +33,7 @@ dev.off()
 # plot Figs 2-4: estimated coefficients from stan model
 # 1: coefs for continuous preds
 pdf(file = "outputs/figs/Fig2.pdf")
-plot(mod_stan, regex_pars = c("edhd", "mobd", "jlhd", "cfdcpd", "invasive", "fresh"),
+plot(mod_stan, pars = "len", regex_pars = c("edhd", "mobd", "jlhd", "cfdcpd", "invasive", "fresh"),
      prob = 0.8, prob_outer = 0.95)
 dev.off()
 
