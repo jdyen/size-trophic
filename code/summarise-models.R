@@ -10,6 +10,9 @@ library(plotrix)
 # load fitted model workspace
 load("fitted-mods.RData")
 
+# load some helper functions
+source("code/helpers.R")
+
 # need to extract some correlations
 naive_vals <- cbind(apply(naive_lm_pred1, 2, median),
                     apply(naive_lm_pred2, 2, median),

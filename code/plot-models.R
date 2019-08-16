@@ -10,6 +10,9 @@ library(plotrix)
 # load fitted model workspace
 load("fitted-mods.RData")
 
+# load some helper functions
+source("code/helpers.R")
+
 # plot Fig. 1: residuals from fitted models
 stan_predictions <- posterior_predict(mod_stan1)
 stan_plot <- apply(stan_predictions, 2, median)

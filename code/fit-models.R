@@ -11,6 +11,9 @@ library(plotrix)
 Sys.setenv(JAVA_HOME = "/Library/Java/JavaVirtualMachines/jdk-11.0.1.jdk/Contents/Home/")
 Sys.setenv(LD_LIBRARY_PATH = "/Library/Java/JavaVirtualMachines/jdk-11.0.1.jdk/Contents/Home/lib/server/")
 
+# load some helper functions
+source("code/helpers.R")
+
 # start with all the data
 data_set <- read.csv("data/raw-data-44k-records-with-stream-info.csv", stringsAsFactors = FALSE)
 
