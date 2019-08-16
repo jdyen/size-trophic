@@ -359,3 +359,5 @@ for (k in seq_along(guilds)) {
   fitted_rf_guilds[[k]][, 3] <- predict(mod_ctmp3)
   
 }
+
+save.image(file = "outputs/fitted-models.RData")

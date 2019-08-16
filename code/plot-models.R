@@ -8,7 +8,7 @@ library(edarf)
 library(plotrix)
 
 # load fitted model workspace
-load("fitted-mods.RData")
+load("outputs/fitted-models.RData")
 
 # load some helper functions
 source("code/helpers.R")
