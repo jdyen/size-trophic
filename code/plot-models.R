@@ -57,12 +57,29 @@ dev.off()
 # plot Figs 2, 3, S1: estimated coefficients from stan model
 pdf(file = "outputs/figs/Fig2.pdf")
 par(mfrow = c(1, 1), mar = c(4.5, 8.2, 1.1, 1.1))
-boxplot_fn(mod_stan1, regex_pars = c("edhd", "mobd", "jlhd", "cfdcpd", "fresh", "streamLonely", "streamSonly"),
+boxplot_fn(mod_stan1, regex_pars = c("edhd", "mobd", "jlhd", "cfdcpd", "fresh", "streamLonely$", "streamSonly$"),
            prob = 0.8, prob_outer = 0.95,
            labels = c("EdHd", "MoBd", "JlHd", "CFdCPd", "Freshwater", "Lake", "Stream"),
            xlab = "Coefficient",
            intercept = FALSE)
 dev.off()
+
+# plot Fig. S1: estimated length effects in different water bodies
+pdf(file = "outputs/figs/FigS1.pdf")
+par(mfrow = c(1, 1), mar = c(4.5, 8.2, 1.1, 1.1))
+boxplot_fn(mod_stan1, regex_pars = c("^streamSonly:len$", "^streamLonely:len$"),
+           prob = 0.8, prob_outer = 0.95,
+           labels = c("Length:Lake", "Length:Stream"),
+           xlab = "Coefficient",
+           offset = "len",
+           transform = FALSE)
+dev.off()
+
+# calculate proportion herb/detrit in each order
+prop_guilds <- tapply(sp_data$guild, sp_data$ord, table)
+prop_guilds <- do.call(rbind, prop_guilds)
+guild_num <- apply(prop_guilds, 1, sum)
+prop_guilds <- sweep(prop_guilds, 1, apply(prop_guilds, 1, sum), "/")
 
 # Plot Fig. 3 with embedded pie charts
 jpeg(file = "outputs/figs/Fig3.jpg", width = 8.5, height = 7, units = "in", res = 150)
@@ -74,12 +91,12 @@ boxplot_fn(mod_stan1, regex_pars = c("len ecor"),
            prob = 0.8, prob_outer = 0.95,
            labels = levels(sp_data$ecoregion),
            ylab = "Ecoregion",
-           intercept = FALSE)
+           offset = "len")
 boxplot_fn(mod_stan1, regex_pars = c("len ord"),
            prob = 0.8, prob_outer = 0.95,
            labels = levels(sp_data$ord), cex.axis = 0.75,
            ylab = "Order", order = idx,
-           intercept = FALSE,
+           offset = "len",
            xlim = c(-0.2, 0.2))
 col_pal <- viridis::inferno(4)
 to_plot <- prop_guilds[idx, ]
@@ -93,20 +110,24 @@ legend(x = 0.129, y = 31, legend = c("Herb./detrit.", "Omni.", "Sec. cons.", "To
        xjust = 0.5, cex = 1.0)
 dev.off()
 
-# Fig S1: length effects by order and ecoregion
-pdf(file = "outputs/figs/FigS1.pdf", width = 8.5)
+# Fig S2: length effects by order and ecoregion
+pdf(file = "outputs/figs/FigS2.pdf", width = 8.5)
 par(mfrow = c(1, 2), mar = c(4.2, 8.2, 1.1, 1.1))
 boxplot_fn(mod_stan1, regex_pars = c(") ecor"),
            prob = 0.8, prob_outer = 0.95,
            labels = levels(sp_data$ecoregion), xline = 2.5,
            ylab = "Ecoregion",
-           xlab = "Trophic position")
+           xlab = "Trophic position",
+           offset = "(Intercept)",
+           transform = TRUE)
 boxplot_fn(mod_stan1, regex_pars = c(") ord"),
            prob = 0.8, prob_outer = 0.95,
            labels = levels(sp_data$ord), cex.axis = 0.75,
            xline = 2.5,
            ylab = "Order",
-           xlab = "Trophic position")
+           xlab = "Trophic position",
+           offset = "(Intercept)",
+           transform = TRUE)
 dev.off()
 
 # plot Fig. 4: partial regression coefficients

@@ -58,7 +58,7 @@ imp_all2 <- round(regression_imp2, 2)
 imp_all3 <- round(regression_imp3, 2)
 imp_combined <- imp_all[order(imp_all, decreasing = TRUE), ]
 names(imp_combined) <- rownames(imp_all)[order(imp_all, decreasing = TRUE)]
-imp_combined <- cbind(imp_combined, imp_all2[rownames(imp_combined), ])
+imp_combined <- cbind(imp_combined, imp_all2[names(imp_combined), ])
 imp_combined <- cbind(imp_combined, imp_all3[rownames(imp_combined), ])
 colnames(imp_combined) <- c("full", "length", "length_in_order")
 

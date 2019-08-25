@@ -5,19 +5,24 @@ boxplot_fn <- function(obj, regex_pars,
                        xlim = NULL,
                        order = NULL,
                        xlab = "Coefficient", ylab = "Parameter",
-                       intercept = TRUE) {
+                       offset = "len",
+                       transform = FALSE) {
   
-  int_val <- apply(posterior_interval(obj, par = "(Intercept)", prob = 0.01), 1, mean)
+  if (!is.null(offset))
+    int_val <- apply(posterior_interval(obj, par = offset, prob = 0.01), 1, mean)
   
   outer <- posterior_interval(obj, regex_pars = regex_pars, prob = prob_outer)
   inner <- posterior_interval(obj, regex_pars = regex_pars, prob = prob)
   coefs <- apply(posterior_interval(obj, regex_pars = regex_pars, prob = 0.01), 1, mean)
   ncoef <- length(coefs)
   
-  if (intercept) {
+  if (!is.null(offset)) {
     outer <- outer + int_val
     inner <- inner + int_val
     coefs <- coefs + int_val
+  }
+  
+  if (transform) {
     outer <- 10 ^ outer
     inner <- 10 ^ inner
     coefs <- 10 ^ coefs
