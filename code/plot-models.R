@@ -64,12 +64,36 @@ boxplot_fn(mod_stan1, regex_pars = c("edhd", "mobd", "jlhd", "cfdcpd", "fresh", 
            intercept = FALSE)
 dev.off()
 
+# extract intercept values and write to a CSV
+len_intercept <- apply(posterior_interval(mod_stan1, par = "len", prob = 0.01), 1, mean)
+
+length_effects <- cbind(
+  posterior_interval(mod_stan1,
+                     regex_pars = c("len ecor", "^streamSonly:len$", "^streamLonely:len$"),
+                     prob = 0.95) + len_intercept,
+  posterior_interval(mod_stan1,
+                     regex_pars = c("len ecor", "^streamSonly:len$", "^streamLonely:len$"),
+                     prob = 0.8) + len_intercept,
+  apply(
+    posterior_interval(mod_stan1,
+                       regex_pars = c("len ecor", "^streamSonly:len$", "^streamLonely:len$"),
+                       prob = 0.01) + len_intercept,
+    1,
+    mean
+  )
+)
+length_effects <- length_effects[, c(5, 1:4)]
+colnames(length_effects)[1] <- "Median"
+rownames(length_effects) <- c("Afrotropic", "Australasia", "IndoMalay", "Nearctic", "Neotropic",
+                              "Oceania", "Palearctic", "Stream", "Lake")
+write.csv(length_effects, file = "outputs/length_coefficients.csv")
+
 # plot Fig. S1: estimated length effects in different water bodies
 pdf(file = "outputs/figs/FigS1.pdf")
 par(mfrow = c(1, 1), mar = c(4.5, 8.2, 1.1, 1.1))
 boxplot_fn(mod_stan1, regex_pars = c("^streamSonly:len$", "^streamLonely:len$"),
            prob = 0.8, prob_outer = 0.95,
-           labels = c("Length:Lake", "Length:Stream"),
+           labels = c("Length:Stream", "Length:Lake"),
            xlab = "Coefficient",
            offset = "len",
            transform = FALSE)
