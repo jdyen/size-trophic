@@ -1,13 +1,10 @@
-# where am I working?
-setwd("~/Dropbox/research/size-trophic/")
-
-# the caret package should make our life easy
+# load some packages
 library(caret)
 library(rstanarm)
 library(edarf)
 library(plotrix)
 
-# I hate Java
+# Set Java settings (needed for some of the ML methods)
 Sys.setenv(JAVA_HOME = "/Library/Java/JavaVirtualMachines/jdk-11.0.1.jdk/Contents/Home/")
 Sys.setenv(LD_LIBRARY_PATH = "/Library/Java/JavaVirtualMachines/jdk-11.0.1.jdk/Contents/Home/lib/server/")
 
@@ -36,7 +33,8 @@ sp_data <- data.frame(
   edhd = c(tapply(data_set$EdHd, data_set$SpecCode, mean, na.rm = TRUE)),
   mobd = c(tapply(data_set$MoBd, data_set$SpecCode, mean, na.rm = TRUE)),
   jlhd = c(tapply(data_set$JlHd, data_set$SpecCode, mean, na.rm = TRUE)),
-  cfdcpd = c(tapply(data_set$CFdCPd, data_set$SpecCode, mean, na.rm = TRUE)))
+  cfdcpd = c(tapply(data_set$CFdCPd, data_set$SpecCode, mean, na.rm = TRUE))
+)
 
 # there are some NAs, let's get rid of them
 sp_data <- sp_data[apply(sp_data, 1, function(x) !any(is.na(x))), ]

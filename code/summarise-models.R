@@ -1,6 +1,3 @@
-# where am I working?
-setwd("~/Dropbox/research/size-trophic/")
-
 # the caret package should make our life easy
 library(caret)
 library(rstanarm)

@@ -6,7 +6,8 @@ boxplot_fn <- function(obj, regex_pars,
                        order = NULL,
                        xlab = "Coefficient", ylab = "Parameter",
                        offset = "len",
-                       transform = FALSE) {
+                       transform = FALSE,
+                       secondary_points = NULL) {
   
   if (!is.null(offset))
     int_val <- apply(posterior_interval(obj, par = offset, prob = 0.01), 1, mean)
@@ -38,19 +39,27 @@ boxplot_fn <- function(obj, regex_pars,
   yplot <- rev(seq_len(ncoef))
   if (is.null(xlim))
     xlim <- range(c(outer, inner, coefs))
+  if (!is.null(secondary_points))
+    xlim <- range(c(xlim, unlist(secondary_points)))
   plot(yplot ~ coefs,
        ylim = ylims, xlim = xlim,
+       type = "n",
        las = 1, bty = "l",
        xlab = "", xaxt = "n",
-       ylab = "", yaxt = "n",
-       pch = 16, cex = 2,
-       col = "black")
+       ylab = "", yaxt = "n")
+  if (!is.null(secondary_points)) {
+    npoints <- sapply(secondary_points, length)
+    points(rep(yplot, npoints) ~ unlist(secondary_points),
+           pch = 16, cex = 0.7, col = scales::alpha("darkred", 0.1))
+  }
+
   for (i in seq_len(ncoef)) {
     lines(c(yplot[i], yplot[i]) ~ c(outer[i, 1], outer[i, 2]),
           lwd = 1.5)
     lines(c(yplot[i], yplot[i]) ~ c(inner[i, 1], inner[i, 2]),
-          lwd = 3.0)
+          lwd = 3.5)
   }
+  points(yplot ~ coefs, pch = 16, cex = 1.5, col = "black")
   
   if (is.null(labels))
     labels <- names(coefs)
@@ -97,11 +106,11 @@ pd_plot <- function(pd, xlab = NULL, ylab = NULL, mean = 0, sd = 1, col_pal = NU
     
   }
   
-  points(tl ~ var, pch = 16, col = scales::alpha("darkred", 0.2))
+  points(tl ~ var, pch = 16, col = scales::alpha("black", 0.2))
   lines(pd[, 2] ~ pd[, 1], lwd = 3)
   
-  mtext(xlab, side = 1, cex = 1, adj = 0.5, line = 2.8)
-  mtext(ylab, side = 2, cex = 1, adj = 0.5, line = 3.5)
+  mtext(xlab, side = 1, cex = 1, adj = 0.5, line = 2.6)
+  mtext(ylab, side = 2, cex = 1, adj = 0.5, line = 2.9)
   
 }
 
