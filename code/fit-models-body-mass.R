@@ -13,12 +13,14 @@ source("code/helpers.R")
 
 # start with all the data
 data_set <- read.csv("data/raw-data-44k-records-with-stream-info.csv", stringsAsFactors = FALSE)
+body_mass <- read.csv("data/data-with-imputed-mass.csv", stringsAsFactors = FALSE)
 
 # replace "Indo-Malay" with single word
 data_set$X3_Ecoregion <- gsub("-", "", data_set$X3_Ecoregion)
 
 # make a data frame with unique values of each variable for each species
 sp_data <- data.frame(
+  sp_code = c(tapply(data_set$SpecCode, data_set$SpecCode, unique)),
   tl = log10(c(tapply(data_set$FoodTroph, data_set$SpecCode, mean))),
   guild = c(tapply(data_set$Trophicguild, data_set$SpecCode, function(x) as.character(unique(x)))),
   len = log10(c(tapply(data_set$LengthcmTL, data_set$SpecCode, mean, na.rm = TRUE))),
@@ -35,6 +37,11 @@ sp_data <- data.frame(
   jlhd = log10(c(tapply(data_set$JlHd, data_set$SpecCode, mean, na.rm = TRUE)) + min(data_set$JlHd[data_set$JlHd > 0], na.rm = TRUE)),
   cfdcpd = c(tapply(data_set$CFdCPd, data_set$SpecCode, mean, na.rm = TRUE))
 )
+
+# add body mass
+idx <- match(sp_data$sp_code, body_mass$sp_code)
+matched_masses <- body_mass$body_mass_predicted[idx]
+sp_data$len <- log10(matched_masses)
 
 # there are some NAs, let's get rid of them
 sp_data <- sp_data[apply(sp_data, 1, function(x) !any(is.na(x))), ]
@@ -389,4 +396,4 @@ mod_jlhd <- stan_lmer(jlhd ~ (len | ord) +
                       iter = 5000,
                       cores = 1)
 
-save.image(file = "outputs/fitted-models.RData")
+save.image(file = "outputs/fitted-models-body-mass.RData")

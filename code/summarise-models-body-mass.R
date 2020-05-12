@@ -5,7 +5,7 @@ library(edarf)
 library(plotrix)
 
 # load fitted model workspace
-load("outputs/fitted-models.RData")
+load("outputs/fitted-models-body-mass.RData")
 
 # load some helper functions
 source("code/helpers.R")
@@ -58,7 +58,7 @@ names(imp_combined) <- rownames(imp_all)[order(imp_all, decreasing = TRUE)]
 imp_combined <- cbind(imp_combined, imp_all2[names(imp_combined), ])
 imp_combined <- cbind(imp_combined, imp_all3[rownames(imp_combined), ])
 colnames(imp_combined) <- c("full", "length", "length_in_order")
-write.csv(imp_combined, file = "outputs/importance_estimates.csv")
+write.csv(imp_combined, file = "outputs/importance_estimates-mass.csv")
 
 # calculate proportion herb/detrit in each order
 prop_guilds <- tapply(sp_data$guild, sp_data$ord, table)
@@ -79,4 +79,4 @@ cor_mod <- stan_lm(slopes ~ prop_herb, data = data_lm,
                    prior = R2(0.5, "mean"))
 prob_neg <- sum(as.matrix(cor_mod)[, "prop_herb"] < 0) / nrow(as.matrix(cor_mod))
 
-write.csv(round(slopes_by_order, 3), file = "outputs/slopes_by_order.csv")
+write.csv(round(slopes_by_order, 3), file = "outputs/slopes_by_order-mass.csv")

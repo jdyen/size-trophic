@@ -5,13 +5,13 @@ library(edarf)
 library(plotrix)
 
 # load fitted model workspace
-load("outputs/fitted-models.RData")
+load("outputs/fitted-models-body-mass.RData")
 
 # load some helper functions
 source("code/helpers.R")
 
 # Fig 1: length effects by order and ecoregion
-jpeg(file = "outputs/figs/Fig1.jpg", units = "in", width = 7, height = 7, res = 150)
+jpeg(file = "outputs/figs/Fig1-mass.jpg", units = "in", width = 7, height = 7, res = 150)
 par(mfrow = c(1, 2), mar = c(4.2, 8.2, 1.1, 1.1))
 real_tp <- tapply(sp_data$tl, sp_data$ecoregion, identity)
 real_tp <- lapply(real_tp, function(x) 10 ^ x)
@@ -43,7 +43,7 @@ guild_num <- apply(prop_guilds, 1, sum)
 prop_guilds <- sweep(prop_guilds, 1, apply(prop_guilds, 1, sum), "/")
 
 # Plot Fig. 2 with embedded pie charts
-jpeg(file = "outputs/figs/Fig2.jpg", width = 8.5, height = 7, units = "in", res = 150)
+jpeg(file = "outputs/figs/Fig2-mass.jpg", width = 8.5, height = 7, units = "in", res = 150)
 idx <- order(prop_guilds[, 1], decreasing = TRUE)
 nlevel <- length(levels(sp_data$ord))
 layout(matrix(c(1, 1, 1, 2, 2, 2, 2), nrow = 1))
@@ -72,7 +72,7 @@ legend(x = 0.129, y = 31, legend = c("Herb./detrit.", "Omni.", "Sec. cons.", "To
 dev.off()
 
 # plot Fig. 3: estimated coefficients from stan model
-pdf(file = "outputs/figs/Fig3.pdf")
+pdf(file = "outputs/figs/Fig3-mass.pdf")
 par(mfrow = c(1, 1), mar = c(4.5, 10, 1.1, 1.1))
 boxplot_fn(mod_stan1, regex_pars = c("edhd", "mobd", "jlhd", "cfdcpd", "b\\[\\(Intercept\\) fresh:Fonly", "streamLonely$", "streamSonly$"),
            prob = 0.8, prob_outer = 0.95,
@@ -87,7 +87,7 @@ dev.off()
 var_list_full <- c("len", "edhd", "mobd", "jlhd", "cfdcpd")
 var_list <- c("len", "jlhd", "mobd")
 var_names <- c("body length (MBL)", "jaw length (JlHd)", "position of the mouth (MoBd)")
-jpeg(file = "outputs/figs/Fig5.jpg", units = "in", width = 7, height = 7, res = 150)
+jpeg(file = "outputs/figs/Fig5-mass.jpg", units = "in", width = 7, height = 7, res = 150)
 par(mfrow = c(2, 2), mar = c(4.1, 4.1, 1.1, 1.1))
 tl_plot <- 10 ^ sp_data$tl
 for (i in seq_along(var_list)) {
@@ -105,7 +105,7 @@ dev.off()
 stan_predictions <- posterior_predict(mod_stan1)
 stan_plot <- apply(stan_predictions, 2, median)
 ctree_plot <- predict(mod_ctree1)
-jpeg(file = "outputs/figs/Fig6.jpg", units = "in", width = 7, height = 7, res = 150)
+jpeg(file = "outputs/figs/Fig6-mass.jpg", units = "in", width = 7, height = 7, res = 150)
 par(mfrow = c(2, 1), mar = c(5.1, 5.1, 2.4, 1.1))
 to_plot1 <- 10 ^ stan_plot
 xplot <- 10 ^ sp_data$tl
@@ -150,4 +150,4 @@ length_effects <- length_effects[, c(5, 1:4)]
 colnames(length_effects)[1] <- "Median"
 rownames(length_effects) <- c("Afrotropic", "Australasia", "IndoMalay", "Nearctic", "Neotropic",
                               "Oceania", "Palearctic", "Stream", "Lake")
-write.csv(length_effects, file = "outputs/length_coefficients.csv")
+write.csv(length_effects, file = "outputs/length_coefficients-mass.csv")

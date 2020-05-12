@@ -7,7 +7,9 @@ boxplot_fn <- function(obj, regex_pars,
                        xlab = "Coefficient", ylab = "Parameter",
                        offset = "len",
                        transform = FALSE,
-                       secondary_points = NULL) {
+                       secondary_points = NULL,
+                       rescale = NULL
+) {
   
   if (!is.null(offset))
     int_val <- apply(posterior_interval(obj, par = offset, prob = 0.01), 1, mean)
@@ -21,6 +23,12 @@ boxplot_fn <- function(obj, regex_pars,
     outer <- outer + int_val
     inner <- inner + int_val
     coefs <- coefs + int_val
+  }
+  
+  if (!is.null(rescale)) {
+    outer <- rescale$int + rescale$sd * outer
+    inner <- rescale$int + rescale$sd * inner
+    coefs <- rescale$int + rescale$sd * coefs
   }
   
   if (transform) {
