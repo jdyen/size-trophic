@@ -85,20 +85,44 @@ dev.off()
 
 # plot Fig. 5: partial regression coefficients
 var_list_full <- c("len", "edhd", "mobd", "jlhd", "cfdcpd")
-var_list <- c("len", "jlhd", "mobd")
-var_names <- c("body length (MBL)", "jaw length (JlHd)", "position of the mouth (MoBd)")
+var_list <- c("len", "jlhd", "cfdcpd")
+var_names <- c("log10(Body mass (BM))", "log10(Jaw length (JlHd))", "Caudal fin aspect (CFdCPd)")
 jpeg(file = "outputs/figs/Fig5-mass.jpg", units = "in", width = 7, height = 7, res = 150)
 par(mfrow = c(2, 2), mar = c(4.1, 4.1, 1.1, 1.1))
 tl_plot <- 10 ^ sp_data$tl
+log_xset <- c(FALSE, FALSE, FALSE)
 for (i in seq_along(var_list)) {
   xmean <- attributes(sp_data[, var_list[i]])$`scaled:center`
   xsd <- attributes(sp_data[, var_list[i]])$`scaled:scale`
   tmp <- pd_regress[[match(var_list, var_list_full)[i]]]
   xplot <- xmean + xsd * sp_data[, var_list[i]]
+  if (log_xset[i])
+    xplot <- 10 ^ xplot
   pd_plot(tmp, xlab = var_names[i], ylab = "Trophic position",
           mean = xmean,
-          sd = xsd, tl = tl_plot, var = xplot)
+          sd = xsd, tl = tl_plot, var = xplot,
+          log_x = log_xset[i])
 }
+dev.off()
+
+# plot Fig. 5 for JlHd model: partial regression coefficients
+jpeg(file = "outputs/figs/Fig5-jlhd_bodymass.jpg", units = "in", width = 7, height = 7, res = 150)
+par(mfrow = c(1, 1), mar = c(4.1, 4.1, 1.1, 1.1))
+xmean <- attributes(sp_data[, "len"])$`scaled:center`
+xsd <- attributes(sp_data[, "len"])$`scaled:scale`
+pd_tmp <- pd_jlhd
+tl_plot <- sp_data$jlhd
+pd_tmp$.outcome <- (pd_tmp$.outcome * attributes(sp_data$jlhd)$`scaled:scale`) + attributes(sp_data$jlhd)$`scaled:center`
+tl_plot <- (tl_plot * attributes(sp_data$jlhd)$`scaled:scale`) + attributes(sp_data$jlhd)$`scaled:center`
+tl_plot <- tl_plot
+xplot <- (xmean + xsd * sp_data[, "len"])
+pd_plot(pd_tmp, xlab = "log10(Body mass (BM))",
+        ylab = "log10(Jaw length (JlHd))",
+        mean = xmean,
+        sd = xsd, tl = tl_plot, var = xplot,
+        ylim = c(-2, 2),
+        log_x = FALSE,
+        log_y = FALSE)
 dev.off()
 
 # plot Fig. 6: residuals from fitted models

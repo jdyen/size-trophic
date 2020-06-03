@@ -8,7 +8,8 @@ boxplot_fn <- function(obj, regex_pars,
                        offset = "len",
                        transform = FALSE,
                        secondary_points = NULL,
-                       rescale = NULL
+                       rescale = NULL,
+                       zero_line = TRUE
 ) {
   
   if (!is.null(offset))
@@ -80,11 +81,12 @@ boxplot_fn <- function(obj, regex_pars,
   mtext(xlab, side = 1, line = xline, adj = 0.5, cex = 1.25)
   mtext(ylab, side = 2, line = yline, adj = 0.5, cex = 1.25)
   
-  lines(c(0, ncoef + 1) ~ c(0, 0), lty = 2, lwd = 1.5)
+  if (zero_line)
+    lines(c(0, ncoef + 1) ~ c(0, 0), lty = 2, lwd = 1.5)
   
 }
 
-pd_plot <- function(pd, xlab = NULL, ylab = NULL, mean = 0, sd = 1, col_pal = NULL, tl, var) {
+pd_plot <- function(pd, xlab = NULL, ylab = NULL, mean = 0, sd = 1, col_pal = NULL, tl, var, ylim = c(2, 4.5), log_x = FALSE, log_y = TRUE) {
   
   col_pal <- RColorBrewer::brewer.pal(4, "Set2")
   
@@ -92,23 +94,27 @@ pd_plot <- function(pd, xlab = NULL, ylab = NULL, mean = 0, sd = 1, col_pal = NU
     xlab <- "Predictor"
   if (is.null(ylab))
     ylab <- "Response"
-  
+
   pd[, 1] <- pd[, 1] * sd + mean
-  pd[, 2] <- 10 ^ pd[, 2]
+  if (log_y)
+    pd[, 2] <- 10 ^ pd[, 2]
+  if (log_x) {
+    pd[, 1] <- 10 ^ pd[, 1]
+  }
   
   if (ncol(pd) == 2) {
 
     plot(pd[, 2] ~ pd[, 1],
          type = "n", las = 1, bty = "l",
          xlab = "", ylab = "",
-         ylim = c(2, 4.5))
+         ylim = ylim)
     
   } else {
     
     plot(pd[, 2] ~ pd[, 1],
          type = "n", las = 1, bty = "l",
          xlab = xlab, ylab = ylab,
-         ylim = c(2, 4.5))    
+         ylim = ylim)    
     for (i in 2:5)
       lines(pd[, i] ~ pd[, 1], col = col_pal[i - 1], lty = 1, lwd = 2)
     

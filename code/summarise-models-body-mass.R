@@ -46,6 +46,13 @@ for (k in seq_along(guilds)) {
 }
 rownames(r2_rf_guild) <- rownames(r2_lm_guild) <- rownames(r2_lm_guild_cv) <- names(r2_rf_guild_cv) <- guilds
 
+# calculate r2 value for jlhd model
+naive_jlhd <- posterior_predict(mod_jlhd)
+naive_tmp <-  apply(naive_jlhd, 2, median)
+r2_jlhd_naive <- cor(naive_tmp, sp_data$jlhd) ** 2
+ctree_naive_jlhd <- predict(mod_ctree_jlhd)
+r2_jlhd_ctree <- cor(ctree_naive_jlhd, sp_data$jlhd) ** 2
+
 # calculate relative importance of all variables
 regression_imp <- ctree_vimp$importance / sum(ctree_vimp$importance)
 regression_imp2 <- ctree_vimp2$importance / sum(ctree_vimp2$importance)
@@ -80,3 +87,31 @@ cor_mod <- stan_lm(slopes ~ prop_herb, data = data_lm,
 prob_neg <- sum(as.matrix(cor_mod)[, "prop_herb"] < 0) / nrow(as.matrix(cor_mod))
 
 write.csv(round(slopes_by_order, 3), file = "outputs/slopes_by_order-mass.csv")
+
+# extract diagnostics from fitted models
+summary_tp1 <- summary(mod_stan1)
+summary_tp2 <- summary(mod_stan2)
+summary_tp3 <- summary(mod_stan3)
+summary_jlhd <- summary(mod_jlhd)
+range(summary_tp1[, "Rhat"])
+range(summary_tp2[, "Rhat"])
+range(summary_tp3[, "Rhat"])
+range(summary_jlhd[, "Rhat"])
+
+# and plot chains
+bayesplot::mcmc_trace(mod_stan1, regex_pars = "len")
+bayesplot::mcmc_trace(mod_stan2, regex_pars = "len")
+bayesplot::mcmc_trace(mod_stan3, regex_pars = "len")
+bayesplot::mcmc_trace(mod_jlhd, regex_pars = "len")
+
+jpeg(file = "outputs/figs/FigS3.jpg", width = 1280, height = 1280, res = 150)
+par(mfrow = c(2, 2))
+hist(resid(mod_stan2), main = "", xlab = "Residual", las = 1)
+mtext("Model 1", side = 3, line = 0, adj = 1)
+hist(resid(mod_stan3), main = "", xlab = "Residual", las = 1)
+mtext("Model 2", side = 3, line = 0, adj = 1)
+hist(resid(mod_stan1), main = "", xlab = "Residual", las = 1)
+mtext("Model 3", side = 3, line = 0, adj = 1)
+hist(resid(mod_jlhd), main = "", xlab = "Residual", las = 1)
+mtext("JlHd model", side = 3, line = 0, adj = 1)
+dev.off()

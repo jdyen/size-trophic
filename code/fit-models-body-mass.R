@@ -396,4 +396,19 @@ mod_jlhd <- stan_lmer(jlhd ~ (len | ord) +
                       iter = 5000,
                       cores = 1)
 
+# jlhd model but with cforest
+mod_ctree_jlhd <- train(jlhd ~ len + ord + 
+                          fresh + ecoregion + stream,
+                        data = sp_data,
+                        method = mod_list[6],
+                        trControl = fitControl)
+ctree_jlhd_vimp <- varImp(mod_ctree_jlhd, scale = FALSE)
+
+# partial dependence
+var_list <- c("len")
+data_pd <- sp_data[, colnames(sp_data) == "len"]
+pd_jlhd <- partial_dependence(mod_ctree_jlhd$finalModel,
+                              vars = "len",
+                              data = data_pd)
+
 save.image(file = "outputs/fitted-models-body-mass.RData")
