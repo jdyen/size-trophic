@@ -9,7 +9,8 @@ boxplot_fn <- function(obj, regex_pars,
                        transform = FALSE,
                        secondary_points = NULL,
                        rescale = NULL,
-                       zero_line = TRUE
+                       zero_line = TRUE,
+                       offset_id = NULL
 ) {
   
   if (!is.null(offset))
@@ -21,9 +22,13 @@ boxplot_fn <- function(obj, regex_pars,
   ncoef <- length(coefs)
   
   if (!is.null(offset)) {
-    outer <- outer + int_val
-    inner <- inner + int_val
-    coefs <- coefs + int_val
+    
+    if (is.null(offset_id))
+      offset_id <- seq_len(ncoef)
+    outer[offset_id,] <- outer[offset_id, ] + int_val
+    inner[offset_id, ] <- inner[offset_id, ] + int_val
+    coefs[offset_id] <- coefs[offset_id] + int_val
+    
   }
   
   if (!is.null(rescale)) {

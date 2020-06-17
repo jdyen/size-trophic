@@ -56,8 +56,12 @@ prop_guilds <- do.call(rbind, prop_guilds)
 guild_num <- apply(prop_guilds, 1, sum)
 prop_guilds <- sweep(prop_guilds, 1, apply(prop_guilds, 1, sum), "/")
 
+# pull out details on number of observations in each ecoregion
+necoregion <- length(levels(sp_data$ecoregion))
+ecoregion_num <- table(sp_data$ecoregion)
+
 # Plot Fig. 2 with embedded pie charts
-jpeg(file = "outputs/figs/Fig2-jlhd-bodymass.jpg", width = 8.5, height = 7, units = "in", res = 150)
+jpeg(file = "outputs/figs/Fig2-jlhd-bodymass.jpg", width = 8.5, height = 7, units = "in", res = 300)
 idx <- order(prop_guilds[, 1], decreasing = TRUE)
 nlevel <- length(levels(sp_data$ord))
 main_effect <- apply(posterior_interval(mod_jlhd, par = "len", prob = 0.01), 1, mean)
@@ -68,11 +72,17 @@ boxplot_fn(mod_jlhd, regex_pars = c("len ecor"),
            labels = levels(sp_data$ecoregion),
            ylab = "Ecoregion",
            offset = "len",
-           zero_line = FALSE)
+           zero_line = FALSE,
+           cex.axis = 1.25,
+           xlim = c(-0.05, 0.55),
+           yline = 6.8)
+for (i in rev(seq_len(necoregion))) {
+  text(x = 0, y = i, paste0("n = ", ecoregion_num[necoregion - i + 1]), xpd = TRUE, cex = 0.9)
+}
 lines(rep(main_effect, 2), c(0, 10), lty = 2)
 boxplot_fn(mod_jlhd, regex_pars = c("len ord"),
            prob = 0.8, prob_outer = 0.95,
-           labels = levels(sp_data$ord), cex.axis = 0.75,
+           labels = levels(sp_data$ord), cex.axis = 1,
            ylab = "Order", order = idx,
            offset = "len",
            xlim = c(-1.0, 1.5),
@@ -88,4 +98,18 @@ lines(rep(main_effect, 2), c(-10, 40), lty = 2)
 legend(x = 1.3, y = 31, legend = c("Herb./detrit.", "Omni.", "Sec. cons.", "Top pred."),
        fill = col_pal, border = NULL, xpd = TRUE, bty = "n", horiz = FALSE,
        xjust = 0.5, cex = 1.0)
+dev.off()
+
+# plot Fig. 3: estimated coefficients from stan JLHD model
+pdf(file = "outputs/figs/Fig3-jlhd.pdf")
+par(mfrow = c(1, 1), mar = c(4.5, 10, 1.1, 1.1))
+boxplot_fn(mod_jlhd,
+           regex_pars = c("b\\[len fresh:Fonly\\]", "b\\[len fresh:FandM\\]",
+                          "streamLonely:len", "streamSonly:len"),
+           prob = 0.8, prob_outer = 0.95,
+           labels = c("Freshwater:MBM", "Marine:MBM",
+                      "Lake:MBM", "River:MBM"),
+           xlab = "Coefficient",
+           offset = "len",
+           yline = 8.5)
 dev.off()

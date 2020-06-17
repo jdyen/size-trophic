@@ -42,28 +42,39 @@ prop_guilds <- do.call(rbind, prop_guilds)
 guild_num <- apply(prop_guilds, 1, sum)
 prop_guilds <- sweep(prop_guilds, 1, apply(prop_guilds, 1, sum), "/")
 
+# pull out details on number of observations in each ecoregion
+necoregion <- length(levels(sp_data$ecoregion))
+ecoregion_num <- table(sp_data$ecoregion)
+
 # Plot Fig. 2 with embedded pie charts
-jpeg(file = "outputs/figs/Fig2-mass.jpg", width = 8.5, height = 7, units = "in", res = 150)
+jpeg(file = "outputs/figs/Fig2-mass.jpg", width = 8.5, height = 7, units = "in", res = 300)
 idx <- order(prop_guilds[, 1], decreasing = TRUE)
 nlevel <- length(levels(sp_data$ord))
 layout(matrix(c(1, 1, 1, 2, 2, 2, 2), nrow = 1))
-par(mar = c(5.5, 8.2, 1.6, 1.1))
+par(mar = c(5.5, 9.2, 1.6, 1.1))
 boxplot_fn(mod_stan1, regex_pars = c("len ecor"),
            prob = 0.8, prob_outer = 0.95,
            labels = levels(sp_data$ecoregion),
            ylab = "Ecoregion",
-           offset = "len")
+           offset = "len",
+           cex.axis = 1.25,
+           xlim = c(-0.04, 0.035),
+           yline = 6.8)
+for (i in rev(seq_len(necoregion))) {
+  text(x = -0.032, y = i, paste0("n = ", ecoregion_num[necoregion - i + 1]), xpd = TRUE, cex = 0.9)
+}
 boxplot_fn(mod_stan1, regex_pars = c("len ord"),
            prob = 0.8, prob_outer = 0.95,
-           labels = levels(sp_data$ord), cex.axis = 0.75,
+           labels = levels(sp_data$ord), cex.axis = 1,
            ylab = "Order", order = idx,
            offset = "len",
-           xlim = c(-0.2, 0.2))
+           xlim = c(-0.2, 0.2),
+           yline = 7.8)
 col_pal <- viridis::inferno(4)
 to_plot <- prop_guilds[idx, ]
 guild_num_sorted <- guild_num[idx]
 for (i in rev(seq_len(nlevel))) {
-  floating.pie(xpos = -0.119, ypos = i, x = to_plot[30 - i + 1, ], col = col_pal[which(to_plot[30 - i + 1, ] > 0)], radius = 0.01)
+  floating.pie(xpos = -0.119, ypos = i, x = to_plot[nlevel - i + 1, ], col = col_pal[which(to_plot[30 - i + 1, ] > 0)], radius = 0.01)
   text(x = -0.18, y = i, paste0("n = ", guild_num_sorted[30 - i + 1]), xpd = TRUE, cex = 0.9)
 }
 legend(x = 0.129, y = 31, legend = c("Herb./detrit.", "Omni.", "Sec. cons.", "Top pred."),
@@ -74,13 +85,18 @@ dev.off()
 # plot Fig. 3: estimated coefficients from stan model
 pdf(file = "outputs/figs/Fig3-mass.pdf")
 par(mfrow = c(1, 1), mar = c(4.5, 10, 1.1, 1.1))
-boxplot_fn(mod_stan1, regex_pars = c("edhd", "mobd", "jlhd", "cfdcpd", "b\\[\\(Intercept\\) fresh:Fonly", "streamLonely$", "streamSonly$"),
+boxplot_fn(mod_stan1,
+           regex_pars = c("edhd", "mobd", "jlhd", "cfdcpd",
+                          "b\\[len fresh:Fonly\\]", "b\\[len fresh:FandM\\]",
+                          "streamLonely:len", "streamSonly:len"),
            prob = 0.8, prob_outer = 0.95,
-           labels = c("eye diameter", "position of the mouth", "jaw length",
-                      "caudal fin aspect", "freshwater", "lake", "river"),
+           labels = c("Eye diameter", "Position of the mouth", "Jaw length",
+                      "Caudal fin aspect", "Freshwater:MBM", "Marine:MBM",
+                      "Lake:MBM", "River:MBM"),
            xlab = "Coefficient",
-           offset = NULL,
-           yline = 8.5)
+           offset = "len",
+           yline = 8.5,
+           offset_id = c(5:8))
 dev.off()
 
 # plot Fig. 5: partial regression coefficients
