@@ -67,6 +67,12 @@ imp_combined <- cbind(imp_combined, imp_all3[rownames(imp_combined), ])
 colnames(imp_combined) <- c("full", "length", "length_in_order")
 write.csv(imp_combined, file = "outputs/importance_estimates-mass.csv")
 
+# calculate relative importance of variables in jlhd models
+jlhd_imp <- ctree_jlhd_vimp$importance / sum(ctree_jlhd_vimp$importance)
+jlhd_imp <- round(jlhd_imp, 2)
+jlhd_imp <- as.matrix(jlhd_imp)[order(jlhd_imp, decreasing = TRUE), ]
+write.csv(jlhd_imp, file = "outputs/importance_estimates-jlhd.csv")
+
 # calculate proportion herb/detrit in each order
 prop_guilds <- tapply(sp_data$guild, sp_data$ord, table)
 prop_guilds <- do.call(rbind, prop_guilds)
@@ -87,6 +93,47 @@ cor_mod <- stan_lm(slopes ~ prop_herb, data = data_lm,
 prob_neg <- sum(as.matrix(cor_mod)[, "prop_herb"] < 0) / nrow(as.matrix(cor_mod))
 
 write.csv(round(slopes_by_order, 3), file = "outputs/slopes_by_order-mass.csv")
+
+# plot these slopes by order
+jpeg(file = "outputs/figs/FigXX-tp-mbm-slopes-by-order.jpg", units = "in", width = 7, height = 7, res = 300)
+xplot <- prop_guilds[, "Herb_detrite"]
+xplot <- jitter(xplot, factor = 5)
+yplot <- slopes_by_order[, "mean"]
+yplot_lwide <- slopes_by_order[, "X2.5."]
+yplot_lnarr <- slopes_by_order[, "X10."]
+yplot_hnarr <- slopes_by_order[, "X90."]
+yplot_hwide <- slopes_by_order[, "X97.5."]
+plot(yplot ~ xplot,
+     ylim = c(min(yplot_lwide), max(yplot_hwide)), xlim = c(0.00, 0.22),
+     las = 1, bty = "l",
+     xlab = "Proportion herbivores/detritivores",
+     ylab = "Slope",
+     pch = 16, col = scales::alpha("black", 0.9))
+for (i in seq_len(nrow(slopes_by_order))) {
+  lines(c(xplot[i], xplot[i]), c(yplot_lwide[i], yplot_hwide[i]), lwd = 1)
+  lines(c(xplot[i], xplot[i]), c(yplot_lnarr[i], yplot_hnarr[i]), lwd = 2)
+}
+dev.off()
+
+
+# mean slope estimates between JLHD and MBM by Order
+main_effect <- apply(posterior_interval(mod_jlhd, pars = "len", prob = 0.01), 1, mean)
+mean_slopes <- apply(posterior_interval(mod_jlhd, regex_pars = c("len ord"), prob = 0.01), 1, mean)
+jlhd_slopes_by_order <- data.frame(
+  mean = mean_slopes,
+  posterior_interval(mod_jlhd, regex_pars = c("len ord"), prob = 0.8),
+  posterior_interval(mod_jlhd, regex_pars = c("len ord"), prob = 0.95)
+)
+write.csv(round(jlhd_slopes_by_order, 3), file = "outputs/slopes_by_order-jlhd.csv")
+
+# mean slope estimates between JLHD and MBM by ecoregion
+mean_slopes <- apply(posterior_interval(mod_jlhd, regex_pars = c("len ecoregion"), prob = 0.01), 1, mean)
+jlhd_slopes_by_ecoregion <- data.frame(
+  mean = mean_slopes,
+  posterior_interval(mod_jlhd, regex_pars = c("len ecoregion"), prob = 0.8),
+  posterior_interval(mod_jlhd, regex_pars = c("len ecoregion"), prob = 0.95)
+)
+write.csv(round(jlhd_slopes_by_ecoregion, 3), file = "outputs/slopes_by_ecoregion-jlhd.csv")
 
 # extract diagnostics from fitted models
 summary_tp1 <- summary(mod_stan1)

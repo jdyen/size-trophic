@@ -72,21 +72,21 @@ boxplot_fn(mod_jlhd, regex_pars = c("len ecor"),
            labels = levels(sp_data$ecoregion),
            ylab = "Ecoregion",
            offset = "len",
-           zero_line = FALSE,
+           zero_line = TRUE,
            cex.axis = 1.25,
-           xlim = c(-0.05, 0.55),
+           xlim = c(-0.2, 0.55),
            yline = 6.8)
 for (i in rev(seq_len(necoregion))) {
-  text(x = 0, y = i, paste0("n = ", ecoregion_num[necoregion - i + 1]), xpd = TRUE, cex = 0.9)
+  text(x = -0.12, y = i, paste0("n = ", ecoregion_num[necoregion - i + 1]), xpd = TRUE, cex = 0.9)
 }
-lines(rep(main_effect, 2), c(0, 10), lty = 2)
+# lines(rep(main_effect, 2), c(0, 10), lty = 2)
 boxplot_fn(mod_jlhd, regex_pars = c("len ord"),
            prob = 0.8, prob_outer = 0.95,
            labels = levels(sp_data$ord), cex.axis = 1,
            ylab = "Order", order = idx,
            offset = "len",
            xlim = c(-1.0, 1.5),
-           zero_line = FALSE)
+           zero_line = TRUE)
 col_pal <- viridisLite::inferno(4)
 to_plot <- prop_guilds[idx, ]
 guild_num_sorted <- guild_num[idx]
@@ -94,7 +94,7 @@ for (i in rev(seq_len(nlevel))) {
   floating.pie(xpos = -0.65, ypos = i, x = to_plot[30 - i + 1, ], col = col_pal[which(to_plot[30 - i + 1, ] > 0)], radius = 0.06)
   text(x = -0.95, y = i, paste0("n = ", guild_num_sorted[30 - i + 1]), xpd = TRUE, cex = 0.9)
 }
-lines(rep(main_effect, 2), c(-10, 40), lty = 2)
+# lines(rep(main_effect, 2), c(-10, 40), lty = 2)
 legend(x = 1.3, y = 31, legend = c("Herb./detrit.", "Omni.", "Sec. cons.", "Top pred."),
        fill = col_pal, border = NULL, xpd = TRUE, bty = "n", horiz = FALSE,
        xjust = 0.5, cex = 1.0)
